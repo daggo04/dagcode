@@ -954,7 +954,15 @@ export namespace SessionPrompt {
   async function createUserMessage(input: PromptInput) {
     const agent = await Agent.get(input.agent ?? (await Agent.defaultAgent()))
 
-    const model = input.model ?? agent.model ?? (await lastModel(input.sessionID))
+    const lastMdlRaw = !input.model ? await lastModel(input.sessionID) : undefined
+    const lastMdl = typeof lastMdlRaw === "object" ? lastMdlRaw : undefined
+    const activeProvider = input.model?.providerID ?? lastMdl?.providerID
+    const model =
+      input.model ??
+      (activeProvider ? agent.modelByProvider?.[activeProvider] : undefined) ??
+      agent.model ??
+      lastMdl ??
+      (await Provider.defaultModel())
     const full =
       !input.variant && agent.variant
         ? await Provider.getModel(model.providerID, model.modelID).catch(() => undefined)
@@ -1494,7 +1502,15 @@ NOTE: At any point in time through this workflow you should feel free to ask the
       await SessionRevert.cleanup(session)
     }
     const agent = await Agent.get(input.agent)
-    const model = input.model ?? agent.model ?? (await lastModel(input.sessionID))
+    const lastMdlRaw2 = !input.model ? await lastModel(input.sessionID) : undefined
+    const lastMdl2 = typeof lastMdlRaw2 === "object" ? lastMdlRaw2 : undefined
+    const activeProvider2 = input.model?.providerID ?? lastMdl2?.providerID
+    const model =
+      input.model ??
+      (activeProvider2 ? agent.modelByProvider?.[activeProvider2] : undefined) ??
+      agent.model ??
+      lastMdl2 ??
+      (await Provider.defaultModel())
     const userMsg: MessageV2.User = {
       id: Identifier.ascending("message"),
       sessionID: input.sessionID,
@@ -1797,6 +1813,13 @@ NOTE: At any point in time through this workflow you should feel free to ask the
       }
       if (command.agent) {
         const cmdAgent = await Agent.get(command.agent)
+        const cmdLastMdl = !input.model ? await lastModel(input.sessionID) : undefined
+        const cmdProvider = input.model
+          ? Provider.parseModel(input.model).providerID
+          : (typeof cmdLastMdl === "object" ? cmdLastMdl?.providerID : undefined)
+        if (cmdProvider && cmdAgent?.modelByProvider?.[cmdProvider]) {
+          return cmdAgent.modelByProvider[cmdProvider]
+        }
         if (cmdAgent?.model) {
           return cmdAgent.model
         }

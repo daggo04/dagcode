@@ -1897,6 +1897,15 @@ function Task(props: ToolProps<typeof TaskTool>) {
 
   const current = createMemo(() => tools().findLast((x) => x.state.status !== "pending"))
 
+  const subagentModel = createMemo(() => {
+    const sessionID = props.metadata.sessionId
+    if (!sessionID) return undefined
+    const msgs = sync.data.message[sessionID] ?? []
+    const assistant = msgs.find((x) => x.role === "assistant") as AssistantMessage | undefined
+    if (!assistant) return undefined
+    return `${assistant.providerID}/${assistant.modelID}`
+  })
+
   const isRunning = createMemo(() => props.part.state.status === "running")
 
   return (
@@ -1915,6 +1924,9 @@ function Task(props: ToolProps<typeof TaskTool>) {
           <box>
             <text style={{ fg: theme.textMuted }}>
               {props.input.description} ({tools().length} toolcalls)
+              <Show when={subagentModel()}>
+                <span style={{ fg: theme.textMuted }}> · {subagentModel()}</span>
+              </Show>
             </text>
             <Show when={current()}>
               {(item) => {

@@ -85,6 +85,11 @@ export function Header() {
               <box flexDirection={narrow() ? "column" : "row"} justifyContent="space-between" gap={narrow() ? 1 : 0}>
                 <text fg={theme.text}>
                   <b>Subagent session</b>
+                  <Show when={messages().find((x) => x.role === "assistant") as AssistantMessage | undefined}>
+                    {(msg) => (
+                      <span style={{ fg: theme.textMuted }}> · {msg().providerID}/{msg().modelID}</span>
+                    )}
+                  </Show>
                 </text>
                 <ContextInfo context={context} cost={cost} />
               </box>

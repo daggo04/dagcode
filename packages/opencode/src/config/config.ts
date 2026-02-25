@@ -685,7 +685,7 @@ export namespace Config {
 
   export const Agent = z
     .object({
-      model: ModelId.optional(),
+      model: z.union([ModelId, z.record(z.string(), ModelId)]).optional(),
       variant: z
         .string()
         .optional()

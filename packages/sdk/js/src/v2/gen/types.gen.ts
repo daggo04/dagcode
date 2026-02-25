@@ -1437,7 +1437,11 @@ export type PermissionConfig =
   | PermissionActionConfig
 
 export type AgentConfig = {
-  model?: string
+  model?:
+    | string
+    | {
+        [key: string]: string
+      }
   /**
    * Default model variant for this agent (applies only when using the agent's configured model).
    */
@@ -1479,6 +1483,10 @@ export type AgentConfig = {
   permission?: PermissionConfig
   [key: string]:
     | unknown
+    | string
+    | {
+        [key: string]: string
+      }
     | string
     | number
     | {
@@ -2261,6 +2269,12 @@ export type Agent = {
   model?: {
     modelID: string
     providerID: string
+  }
+  modelByProvider?: {
+    [key: string]: {
+      modelID: string
+      providerID: string
+    }
   }
   variant?: string
   prompt?: string
