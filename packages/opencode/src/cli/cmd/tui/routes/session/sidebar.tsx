@@ -1,5 +1,5 @@
 import { useSync } from "@tui/context/sync"
-import { createMemo, For, Show, Switch, Match } from "solid-js"
+import { createMemo, createSignal, createResource, For, Show, Switch, Match } from "solid-js"
 import { createStore } from "solid-js/store"
 import { useTheme } from "../../context/theme"
 import { Locale } from "@/util/locale"
@@ -11,6 +11,41 @@ import { useKeybind } from "../../context/keybind"
 import { useDirectory } from "../../context/directory"
 import { useKV } from "../../context/kv"
 import { TodoItem } from "../../component/todo-item"
+
+async function fetchUpstreamLatest(): Promise<{ tag: string; date: string } | undefined> {
+  const res = await fetch("https://api.github.com/repos/anomalyco/opencode/releases/latest", {
+    headers: { Accept: "application/vnd.github+json" },
+  }).catch(() => undefined)
+  if (!res || !res.ok) return undefined
+  const data = await res.json()
+  return { tag: data.tag_name, date: data.published_at?.slice(0, 10) ?? "" }
+}
+
+function UpstreamStatus() {
+  const { theme } = useTheme()
+  const buildDate = Installation.BUILD_DATE
+  const [upstream] = createResource(fetchUpstreamLatest)
+
+  const isOutdated = createMemo(() => {
+    const u = upstream()
+    if (!u || !u.date || !buildDate) return false
+    return buildDate < u.date
+  })
+
+  return (
+    <box>
+      <text fg={theme.textMuted}>
+        built <span style={{ fg: theme.text }}>{buildDate}</span>
+      </text>
+      <Show when={upstream()}>
+        <text fg={isOutdated() ? theme.error : theme.success}>
+          {isOutdated() ? "⚠ " : "✓ "}
+          upstream {upstream()!.tag} ({upstream()!.date})
+        </text>
+      </Show>
+    </box>
+  )
+}
 
 export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
   const sync = useSync()
@@ -308,12 +343,13 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
             <span style={{ fg: theme.text }}>{directory().split("/").at(-1)}</span>
           </text>
           <text fg={theme.textMuted}>
-            <span style={{ fg: theme.success }}>•</span> <b>Open</b>
+            <span style={{ fg: theme.success }}>•</span> <b>Dag</b>
             <span style={{ fg: theme.text }}>
               <b>Code</b>
             </span>{" "}
             <span>{Installation.VERSION}</span>
           </text>
+          <UpstreamStatus />
         </box>
       </box>
     </Show>

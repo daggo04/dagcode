@@ -186,6 +186,7 @@ for (const item of targets) {
       OPENCODE_WORKER_PATH: workerPath,
       OPENCODE_CHANNEL: `'${Script.channel}'`,
       OPENCODE_LIBC: item.os === "linux" ? `'${item.abi ?? "glibc"}'` : "",
+      DAGCODE_BUILD_DATE: `'${new Date().toISOString().slice(0, 10)}'`,
     },
   })
 

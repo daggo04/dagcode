@@ -10,6 +10,7 @@ import { Flag } from "../flag/flag"
 declare global {
   const OPENCODE_VERSION: string
   const OPENCODE_CHANNEL: string
+  const DAGCODE_BUILD_DATE: string
 }
 
 export namespace Installation {
@@ -192,6 +193,7 @@ export namespace Installation {
   export const VERSION = typeof OPENCODE_VERSION === "string" ? OPENCODE_VERSION : "local"
   export const CHANNEL = typeof OPENCODE_CHANNEL === "string" ? OPENCODE_CHANNEL : "local"
   export const USER_AGENT = `opencode/${CHANNEL}/${VERSION}/${Flag.OPENCODE_CLIENT}`
+  export const BUILD_DATE = typeof DAGCODE_BUILD_DATE === "string" ? DAGCODE_BUILD_DATE : new Date().toISOString().slice(0, 10)
 
   export async function latest(installMethod?: Method) {
     const detectedMethod = installMethod || (await method())
