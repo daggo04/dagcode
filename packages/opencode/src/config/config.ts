@@ -1057,9 +1057,12 @@ export namespace Config {
         .optional()
         .describe("When set, ONLY these providers will be enabled. All other providers will be ignored"),
       model: ModelId.describe("Model to use in the format of provider/model, eg anthropic/claude-2").optional(),
-      small_model: ModelId.describe(
-        "Small model to use for tasks like title generation in the format of provider/model",
-      ).optional(),
+      small_model: z
+        .union([ModelId, z.record(z.string(), ModelId)])
+        .describe(
+          "Small model to use for tasks like title generation. Either provider/model string or a record keyed by provider ID",
+        )
+        .optional(),
       default_agent: z
         .string()
         .optional()

@@ -1213,8 +1213,11 @@ export namespace Provider {
     const cfg = await Config.get()
 
     if (cfg.small_model) {
-      const parsed = parseModel(cfg.small_model)
-      return getModel(parsed.providerID, parsed.modelID)
+      const raw = typeof cfg.small_model === "string" ? cfg.small_model : cfg.small_model[providerID]
+      if (raw) {
+        const parsed = parseModel(raw)
+        return getModel(parsed.providerID, parsed.modelID)
+      }
     }
 
     const provider = await state().then((state) => state.providers[providerID])

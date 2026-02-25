@@ -1941,6 +1941,10 @@ NOTE: At any point in time through this workflow you should feel free to ask the
     const agent = await Agent.get("title")
     if (!agent) return
     const model = await iife(async () => {
+      if (agent.modelByProvider?.[input.providerID]) {
+        const m = agent.modelByProvider[input.providerID]
+        return await Provider.getModel(m.providerID, m.modelID)
+      }
       if (agent.model) return await Provider.getModel(agent.model.providerID, agent.model.modelID)
       return (
         (await Provider.getSmallModel(input.providerID)) ?? (await Provider.getModel(input.providerID, input.modelID))
