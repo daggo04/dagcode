@@ -1764,9 +1764,13 @@ export type Config = {
    */
   model?: string
   /**
-   * Small model to use for tasks like title generation in the format of provider/model
+   * Small model to use for tasks like title generation. Either provider/model string or a record keyed by provider ID
    */
-  small_model?: string
+  small_model?:
+    | string
+    | {
+        [key: string]: string
+      }
   /**
    * Default agent to use when none is specified. Must be a primary agent. Falls back to 'build' if not set or if the specified agent is invalid.
    */
