@@ -34,3 +34,9 @@ Ignore `github-v*` and `vscode-v*` tags — those are for other packages.
 - Never rebase — always merge
 - Preserve all fork-specific customizations when resolving conflicts (files like README.md, branding changes, AGENTS.md, .opencode/ agent configs)
 - If unsure about a conflict, always ask the user
+
+## Fork context
+
+- `.gitattributes` has `merge=ours` for `README.md` — this prevents conflicts on the fork's custom README automatically. Requires `git config merge.ours.driver true` (set per-clone).
+- Upstream content that's fine to accept: `.opencode/glossary/*` (not agents, just reference data), `.opencode/agent/translator.md` (subagent), translated `README.*.md` files, docs, CI workflows.
+- Fork-specific files to always preserve: `README.md`, `AGENTS.md`, `.opencode/agent/upstream.md`, any branding/logo changes in TUI code.
