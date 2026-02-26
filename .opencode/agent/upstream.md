@@ -1,6 +1,6 @@
 ---
 description: Merge latest upstream opencode release into this fork
-mode: subagent
+mode: primary
 ---
 
 You help merge upstream releases from anomalyco/opencode into this personal fork (daggo04/dagcode).
