@@ -253,7 +253,7 @@ export function GrowBox(props: GrowBoxProps) {
   onMount(() => {
     if (!root || !body) return
 
-    const offChange = height.on("change", (next) => {
+    const offChange = height.on("change", (next: number) => {
       if (!root) return
       root.style.height = `${Math.max(0, next)}px`
     })

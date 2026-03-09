@@ -213,7 +213,7 @@ function ToolCallPanel(props: ToolCallPanelBaseProps) {
   onMount(() => {
     if (!props.springContent || props.animate === false || !contentRef || !bodyRef) return
 
-    const offChange = heightSpring.on("change", (v) => {
+    const offChange = heightSpring.on("change", (v: number) => {
       if (!contentRef) return
       contentRef.style.height = `${Math.max(0, Math.ceil(v))}px`
     })

@@ -3,7 +3,7 @@ import type { SpringOptions } from "motion"
 import { createEffect, createSignal, onCleanup } from "solid-js"
 import { useReducedMotion } from "../hooks/use-reduced-motion"
 
-type Opt = Pick<SpringOptions, "visualDuration" | "bounce" | "stiffness" | "damping" | "mass" | "velocity">
+type Opt = Partial<Pick<SpringOptions, "visualDuration" | "bounce" | "stiffness" | "damping" | "mass" | "velocity">>
 const eq = (a: Opt | undefined, b: Opt | undefined) =>
   a?.visualDuration === b?.visualDuration &&
   a?.bounce === b?.bounce &&
