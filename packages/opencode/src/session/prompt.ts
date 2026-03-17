@@ -975,7 +975,7 @@ export namespace SessionPrompt {
       (await Provider.defaultModel())
     const full =
       !input.variant && agent.variant
-        ? await Provider.getModel(model.providerID, model.modelID).catch(() => undefined)
+        ? await Provider.getModel(ProviderID.make(model.providerID), ModelID.make(model.modelID)).catch(() => undefined)
         : undefined
     const variant = input.variant ?? (agent.variant && full?.variants?.[agent.variant] ? agent.variant : undefined)
 
@@ -988,7 +988,7 @@ export namespace SessionPrompt {
       },
       tools: input.tools,
       agent: agent.name,
-      model,
+      model: { providerID: ProviderID.make(model.providerID), modelID: ModelID.make(model.modelID) },
       system: input.system,
       format: input.format,
       variant,
@@ -1158,7 +1158,10 @@ export namespace SessionPrompt {
 
                 await ReadTool.init()
                   .then(async (t) => {
-                    const model = await Provider.getModel(info.model.providerID, info.model.modelID)
+                    const model = await Provider.getModel(
+                      ProviderID.make(info.model.providerID),
+                      ModelID.make(info.model.modelID),
+                    )
                     const readCtx: Tool.Context = {
                       sessionID: input.sessionID,
                       abort: new AbortController().signal,
@@ -1530,8 +1533,8 @@ NOTE: At any point in time through this workflow you should feel free to ask the
       role: "user",
       agent: input.agent,
       model: {
-        providerID: model.providerID,
-        modelID: model.modelID,
+        providerID: ProviderID.make(model.providerID),
+        modelID: ModelID.make(model.modelID),
       },
     }
     await Session.updateMessage(userMsg)
@@ -1566,8 +1569,8 @@ NOTE: At any point in time through this workflow you should feel free to ask the
         reasoning: 0,
         cache: { read: 0, write: 0 },
       },
-      modelID: model.modelID,
-      providerID: model.providerID,
+      modelID: ModelID.make(model.modelID),
+      providerID: ProviderID.make(model.providerID),
     }
     await Session.updateMessage(msg)
     const part: MessageV2.Part = {
@@ -1827,7 +1830,9 @@ NOTE: At any point in time through this workflow you should feel free to ask the
         const cmdLastMdl = !input.model ? await lastModel(input.sessionID) : undefined
         const cmdProvider = input.model
           ? Provider.parseModel(input.model).providerID
-          : (typeof cmdLastMdl === "object" ? cmdLastMdl?.providerID : undefined)
+          : typeof cmdLastMdl === "object"
+            ? cmdLastMdl?.providerID
+            : undefined
         if (cmdProvider && cmdAgent?.modelByProvider?.[cmdProvider]) {
           return cmdAgent.modelByProvider[cmdProvider]
         }
@@ -1840,7 +1845,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
     })()
 
     try {
-      await Provider.getModel(taskModel.providerID, taskModel.modelID)
+      await Provider.getModel(ProviderID.make(taskModel.providerID), ModelID.make(taskModel.modelID))
     } catch (e) {
       if (Provider.ModelNotFoundError.isInstance(e)) {
         const { providerID, modelID, suggestions } = e.data
@@ -1874,8 +1879,8 @@ NOTE: At any point in time through this workflow you should feel free to ask the
             description: command.description ?? "",
             command: input.command,
             model: {
-              providerID: taskModel.providerID,
-              modelID: taskModel.modelID,
+              providerID: ProviderID.make(taskModel.providerID),
+              modelID: ModelID.make(taskModel.modelID),
             },
             // TODO: how can we make task tool accept a more complex input?
             prompt: templateParts.find((y) => y.type === "text")?.text ?? "",
@@ -1903,7 +1908,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
     const result = (await prompt({
       sessionID: input.sessionID,
       messageID: input.messageID,
-      model: userModel,
+      model: { providerID: ProviderID.make(userModel.providerID), modelID: ModelID.make(userModel.modelID) },
       agent: userAgent,
       parts,
       variant: input.variant,
@@ -1954,11 +1959,13 @@ NOTE: At any point in time through this workflow you should feel free to ask the
     const model = await iife(async () => {
       if (agent.modelByProvider?.[input.providerID]) {
         const m = agent.modelByProvider[input.providerID]
-        return await Provider.getModel(m.providerID, m.modelID)
+        return await Provider.getModel(ProviderID.make(m.providerID), ModelID.make(m.modelID))
       }
-      if (agent.model) return await Provider.getModel(agent.model.providerID, agent.model.modelID)
+      if (agent.model)
+        return await Provider.getModel(ProviderID.make(agent.model.providerID), ModelID.make(agent.model.modelID))
       return (
-        (await Provider.getSmallModel(input.providerID)) ?? (await Provider.getModel(input.providerID, input.modelID))
+        (await Provider.getSmallModel(ProviderID.make(input.providerID))) ??
+        (await Provider.getModel(ProviderID.make(input.providerID), ModelID.make(input.modelID)))
       )
     })
     const result = await LLM.stream({

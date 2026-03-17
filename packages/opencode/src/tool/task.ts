@@ -11,6 +11,7 @@ import { iife } from "@/util/iife"
 import { defer } from "@/util/defer"
 import { Config } from "../config/config"
 import { PermissionNext } from "@/permission/next"
+import { ModelID, ProviderID } from "@/provider/schema"
 
 const parameters = z.object({
   description: z.string().describe("A short (3-5 words) description of the task"),
@@ -105,10 +106,11 @@ export const TaskTool = Tool.define("task", async (ctx) => {
       if (msg.info.role !== "assistant") throw new Error("Not an assistant message")
 
       const parentProvider = msg.info.providerID
-      const model = agent.modelByProvider?.[parentProvider] ?? agent.model ?? {
-        modelID: msg.info.modelID,
-        providerID: msg.info.providerID,
-      }
+      const model = agent.modelByProvider?.[parentProvider] ??
+        agent.model ?? {
+          modelID: msg.info.modelID,
+          providerID: msg.info.providerID,
+        }
 
       ctx.metadata({
         title: params.description,
@@ -131,8 +133,8 @@ export const TaskTool = Tool.define("task", async (ctx) => {
         messageID,
         sessionID: session.id,
         model: {
-          modelID: model.modelID,
-          providerID: model.providerID,
+          modelID: ModelID.make(model.modelID),
+          providerID: ProviderID.make(model.providerID),
         },
         agent: agent.name,
         tools: {

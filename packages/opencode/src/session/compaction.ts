@@ -133,8 +133,8 @@ export namespace SessionCompaction {
     const parentProvider = userMessage.model.providerID
     const agentModel = agent.modelByProvider?.[parentProvider] ?? agent.model
     const model = agentModel
-      ? await Provider.getModel(agentModel.providerID, agentModel.modelID)
-      : await Provider.getModel(userMessage.model.providerID, userMessage.model.modelID)
+      ? await Provider.getModel(ProviderID.make(agentModel.providerID), ModelID.make(agentModel.modelID))
+      : await Provider.getModel(ProviderID.make(userMessage.model.providerID), ModelID.make(userMessage.model.modelID))
     const msg = (await Session.updateMessage({
       id: MessageID.ascending(),
       role: "assistant",
